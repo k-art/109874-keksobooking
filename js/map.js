@@ -41,7 +41,8 @@
   function getRandomArrayLength(array) {
     shuffleArray(array);
     var newArray = [];
-    for (var i = 0; i < array.length - Math.floor(Math.random() * array.length); i++) {
+    var randomLength = array.length - Math.floor(Math.random() * array.length);
+    for (var i = 0; i < randomLength; i++) {
       newArray[i] = array[i];
     }
     return newArray;
