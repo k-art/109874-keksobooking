@@ -1,8 +1,58 @@
 'use strict';
 
 (function () {
+  // Активация страницы
+
   var map = document.querySelector('.map');
-  map.classList.remove('map--faded');
+  var mapPinMain = map.querySelector('.map__pin--main');
+  var form = document.querySelector('.ad-form');
+  var formFieldsets = form.querySelectorAll('fieldset');
+  var formInputAddress = form.querySelector('#address');
+  var formButtonReset = form.querySelector('.ad-form__reset');
+
+  var MAIN_PIN_WIDTH = 65;
+  var MAIN_PIN_HEIGHT = 65;
+  var MAIN_PIN_SHARP_END = 20;
+
+  deactivatePage();
+
+  function setMainPinAddress(evt) {
+    var x = parseInt(mapPinMain.style.left, 10) - MAIN_PIN_WIDTH / 2;
+    var y = parseInt(mapPinMain.style.top, 10) - MAIN_PIN_HEIGHT / 2;
+
+    if (evt && evt.type === 'mouseup') {
+      y = parseInt(mapPinMain.style.top, 10) - (MAIN_PIN_HEIGHT + MAIN_PIN_SHARP_END);
+    }
+    formInputAddress.value = x + ', ' + y;
+  }
+
+  function deactivatePage(evt) {
+    setMainPinAddress(evt);
+    map.classList.add('map--faded');
+    form.classList.add('ad-form--disabled');
+    for (var i = 0; i < formFieldsets.length; i++) {
+      formFieldsets[i].disabled = true;
+    }
+  }
+
+  function activatePage(evt) {
+    setMainPinAddress(evt);
+    map.classList.remove('map--faded');
+    form.classList.remove('ad-form--disabled');
+    for (var i = 0; i < formFieldsets.length; i++) {
+      formFieldsets[i].disabled = false;
+    }
+  }
+
+  mapPinMain.addEventListener('mouseup', function (evt) {
+    activatePage(evt);
+  });
+
+  formButtonReset.addEventListener('click', function (evt) {
+    deactivatePage(evt);
+  });
+
+  // Отрисовка элементов
 
   var NUMBER_OF_USERS = 8;
   var OFFER_TITLES = ['Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец', 'Маленький ужасный дворец', 'Красивый гостевой домик', 'Некрасивый негостеприимный домик', 'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'];
@@ -148,8 +198,17 @@
   for (var i = 0; i < usersData.length; i++) {
     pinsFragment.appendChild(renderMapPin(usersData[i]));
   }
-  var cardFragment = document.createDocumentFragment().appendChild(renderMapCard(usersData[0]));
-
   mapPinsBlock.appendChild(pinsFragment);
+
+  var mapPins = mapPinsBlock.querySelectorAll('.map__pin');
+
+  // Просмотр подробной информации о похожих объявлениях
+
+  for (i = 0; i < mapPins.length; i++) {
+    mapPins[i].addEventListener('click', function () {
+    });
+  }
+
+  var cardFragment = document.createDocumentFragment().appendChild(renderMapCard(usersData[0]));
   map.insertBefore(cardFragment, mapFiltersContainer);
 })();
