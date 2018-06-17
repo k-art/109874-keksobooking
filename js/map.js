@@ -194,13 +194,13 @@
     mapCard.querySelector('.popup__text--time').textContent = 'Заезд после ' + user.offer.checkIn + ', выезд до ' + user.offer.checkOut;
     mapCard.querySelector('.popup__features').textContent = user.offer.features.join(', ');
     mapCard.querySelector('.popup__description').textContent = user.offer.description;
-    mapCardPhoto.src = user.offer.photos[0];
 
-    for (var i = 1; i < user.offer.photos.length; i++) {
+    for (var i = 0; i < user.offer.photos.length; i++) {
       var photoItem = mapCardPhoto.cloneNode(true);
       photoItem.src = user.offer.photos[i];
       photosFragment.appendChild(photoItem);
     }
+    mapCardPhotos.innerHTML = '';
     mapCardPhotos.appendChild(photosFragment);
   }
 
