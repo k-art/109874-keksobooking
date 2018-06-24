@@ -65,33 +65,17 @@
   };
 
   var priceMap = {
-    bungalo: {
-      minPrice: 0
-    },
-    flat: {
-      minPrice: 1000
-    },
-    house: {
-      minPrice: 5000
-    },
-    palace: {
-      minPrice: 10000
-    }
+    bungalo: 0,
+    flat: 1000,
+    house: 5000,
+    palace: 10000
   };
 
   var homeTypeMap = {
-    bungalo: {
-      typeName: 'Бунгало'
-    },
-    flat: {
-      typeName: 'Квартира'
-    },
-    house: {
-      typeName: 'Дом'
-    },
-    palace: {
-      typeName: 'Дворец'
-    },
+    bungalo: 'Бунгало',
+    flat: 'Квартира',
+    house: 'Дом',
+    palace: 'Дворец',
     noName: 'Неизвестный тип жилья'
   };
 
@@ -225,7 +209,7 @@
   }
 
   function getHomeType(value) {
-    return value ? homeTypeMap[value].typeName : homeTypeMap.noName;
+    return value ? homeTypeMap[value] : homeTypeMap.noName;
   }
 
   // Создание карточки
@@ -285,7 +269,7 @@
   }
 
   function choosePrice(type) {
-    var priceToAdd = priceMap[type].minPrice;
+    var priceToAdd = priceMap[type];
     roomPrice.min = priceToAdd;
     roomPrice.placeholder = priceToAdd;
   }
@@ -297,8 +281,8 @@
 
     for (var i = 0; i < options.length; i++) {
       options[i].disabled = roomAvailability[i];
-      options[roomToSelect].selected = true;
     }
+    options[roomToSelect].selected = true;
   }
 
   matchRooms(roomNumber.value);
