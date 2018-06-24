@@ -45,6 +45,56 @@
   var roomNumber = adForm.querySelector('#room_number');
   var roomCapacity = adForm.querySelector('#capacity');
 
+  var roomMap = {
+    1: {
+      optionStates: [true, true, false, true],
+      selectItem: 2
+    },
+    2: {
+      optionStates: [true, false, false, true],
+      selectItem: 1
+    },
+    3: {
+      optionStates: [false, false, false, true],
+      selectItem: 0
+    },
+    100: {
+      optionStates: [true, true, true, false],
+      selectItem: 3
+    }
+  };
+
+  var priceMap = {
+    bungalo: {
+      minPrice: 0
+    },
+    flat: {
+      minPrice: 1000
+    },
+    house: {
+      minPrice: 5000
+    },
+    palace: {
+      minPrice: 10000
+    }
+  };
+
+  var homeTypeMap = {
+    bungalo: {
+      typeName: 'Бунгало'
+    },
+    flat: {
+      typeName: 'Квартира'
+    },
+    house: {
+      typeName: 'Дом'
+    },
+    palace: {
+      typeName: 'Дворец'
+    },
+    noName: 'Неизвестный тип жилья'
+  };
+
   deactivatePage();
   createMapCard();
   var mapCard = map.querySelector('.map__card');
@@ -162,7 +212,6 @@
     return usersDataArray;
   }
 
-
   // Создание похожих объявлений на карте
   function createMapPin(user) {
     var mapPin = similarMapPin.cloneNode(true);
@@ -176,20 +225,7 @@
   }
 
   function getHomeType(value) {
-    var homeType = 'Неизвестный тип жилья';
-    if (value === 'flat') {
-      homeType = 'Квартира';
-    }
-    if (value === 'bungalo') {
-      homeType = 'Бунгало';
-    }
-    if (value === 'house') {
-      homeType = 'Дом';
-    }
-    if (value === 'palace') {
-      homeType = 'Дворец';
-    }
-    return homeType;
+    return value ? homeTypeMap[value].typeName : homeTypeMap.noName;
   }
 
   // Создание карточки
@@ -248,53 +284,21 @@
     timeToChange.value = checkedTime.value;
   }
 
-  function choosePrice(value) {
-    roomPrice.min = '0';
-
-    roomPrice.placeholder = '0';
-    if (value === 'flat') {
-      roomPrice.min = '1000';
-      roomPrice.placeholder = '1000';
-    }
-    if (value === 'house') {
-      roomPrice.min = '5000';
-      roomPrice.placeholder = '5000';
-    }
-    if (value === 'palace') {
-      roomPrice.min = '10000';
-      roomPrice.placeholder = '10000';
-    }
+  function choosePrice(type) {
+    var priceToAdd = priceMap[type].minPrice;
+    roomPrice.min = priceToAdd;
+    roomPrice.placeholder = priceToAdd;
   }
 
-  function matchRooms(value) {
+  function matchRooms(roomIndex) {
     var options = roomCapacity.querySelectorAll('option');
-    roomCapacity.value = '0';
+    var roomAvailability = roomMap[roomIndex].optionStates;
+    var roomToSelect = roomMap[roomIndex].selectItem;
 
     for (var i = 0; i < options.length; i++) {
-      options[i].disabled = true;
-      options[i].selected = false;
+      options[i].disabled = roomAvailability[i];
+      options[roomToSelect].selected = true;
     }
-
-    if (value === '1') {
-      options[2].disabled = false;
-      roomCapacity.value = value;
-    }
-    if (value === '2') {
-      options[1].disabled = false;
-      options[2].disabled = false;
-      roomCapacity.value = value;
-    }
-    if (value === '3') {
-      options[0].disabled = false;
-      options[1].disabled = false;
-      options[2].disabled = false;
-      roomCapacity.value = value;
-    }
-    if (value === '100') {
-      options[3].disabled = false;
-      roomCapacity.value = '0';
-    }
-
   }
 
   matchRooms(roomNumber.value);
