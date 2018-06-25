@@ -3,10 +3,10 @@
 (function () {
   var map = document.querySelector('.map');
   var mapPinMain = map.querySelector('.map__pin--main');
-  var form = document.querySelector('.ad-form');
-  var formFieldsets = form.querySelectorAll('fieldset');
-  var formInputAddress = form.querySelector('#address');
-  var formButtonReset = form.querySelector('.ad-form__reset');
+  var adForm = document.querySelector('.ad-form');
+  var formFieldsets = adForm.querySelectorAll('fieldset');
+  var formInputAddress = adForm.querySelector('#address');
+  var formButtonReset = adForm.querySelector('.ad-form__reset');
 
   var MAIN_PIN_WIDTH = 65;
   var MAIN_PIN_HEIGHT = 65;
@@ -38,6 +38,47 @@
   var PIN_WIDTH = 50;
   var PIN_HEIGHT = 70;
 
+  var roomTimeIn = adForm.querySelector('#timein');
+  var roomTimeOut = adForm.querySelector('#timeout');
+  var roomType = adForm.querySelector('#type');
+  var roomPrice = adForm.querySelector('#price');
+  var roomNumber = adForm.querySelector('#room_number');
+  var roomCapacity = adForm.querySelector('#capacity');
+
+  var roomMap = {
+    1: {
+      optionStates: [true, true, false, true],
+      selectItem: 2
+    },
+    2: {
+      optionStates: [true, false, false, true],
+      selectItem: 1
+    },
+    3: {
+      optionStates: [false, false, false, true],
+      selectItem: 0
+    },
+    100: {
+      optionStates: [true, true, true, false],
+      selectItem: 3
+    }
+  };
+
+  var priceMap = {
+    bungalo: 0,
+    flat: 1000,
+    house: 5000,
+    palace: 10000
+  };
+
+  var homeTypeMap = {
+    bungalo: 'Бунгало',
+    flat: 'Квартира',
+    house: 'Дом',
+    palace: 'Дворец',
+    noName: 'Неизвестный тип жилья'
+  };
+
   deactivatePage();
   createMapCard();
   var mapCard = map.querySelector('.map__card');
@@ -55,7 +96,7 @@
 
   function deactivatePage(evt) {
     map.classList.add('map--faded');
-    form.classList.add('ad-form--disabled');
+    adForm.classList.add('ad-form--disabled');
     for (var i = 0; i < formFieldsets.length; i++) {
       formFieldsets[i].disabled = true;
     }
@@ -64,7 +105,7 @@
 
   function activatePage(evt) {
     map.classList.remove('map--faded');
-    form.classList.remove('ad-form--disabled');
+    adForm.classList.remove('ad-form--disabled');
     for (var i = 0; i < formFieldsets.length; i++) {
       formFieldsets[i].disabled = false;
     }
@@ -79,6 +120,15 @@
 
   formButtonReset.addEventListener('click', function (evt) {
     deactivatePage(evt);
+    mapCard.classList.add('hidden');
+
+    var mapPinsList = mapPinsBlock.querySelectorAll('.map__pin');
+    for (var i = mapPinsList.length - 1; i >= 0; i--) {
+      var child = mapPinsList[i];
+      if (!child.classList.contains('map__pin--main')) {
+        child.parentElement.removeChild(child);
+      }
+    }
   });
 
 
@@ -114,7 +164,10 @@
   // Создание пользовательских данных
   function createUsersData(number) {
     var usersDataArray = [];
+
     for (var i = 0; i < number; i++) {
+      var newPhotosArray = PHOTOS.slice();
+
       usersDataArray[i] = {
         author: {
           avatar: 'img/avatars/user' + '0' + (i + 1) + '.png'
@@ -130,7 +183,7 @@
           checkOut: getRandomElement(HOURS),
           features: getRandomArrayLength(FEATURES),
           description: '',
-          photos: shuffleArray(PHOTOS)
+          photos: shuffleArray(newPhotosArray)
         },
         location: {
           x: getRandomIntFromRange(MIN_LOCATION_X, MAX_LOCATION_X),
@@ -142,7 +195,6 @@
     }
     return usersDataArray;
   }
-
 
   // Создание похожих объявлений на карте
   function createMapPin(user) {
@@ -157,19 +209,7 @@
   }
 
   function getHomeType(value) {
-    if (value === 'flat') {
-      return 'Квартира';
-    }
-    if (value === 'bungalo') {
-      return 'Бунгало';
-    }
-    if (value === 'house') {
-      return 'Дом';
-    }
-    if (value === 'palace') {
-      return 'Дворец';
-    }
-    return 'Неизвестный тип жилья';
+    return value ? homeTypeMap[value] : homeTypeMap.noName;
   }
 
   // Создание карточки
@@ -194,13 +234,13 @@
     mapCard.querySelector('.popup__text--time').textContent = 'Заезд после ' + user.offer.checkIn + ', выезд до ' + user.offer.checkOut;
     mapCard.querySelector('.popup__features').textContent = user.offer.features.join(', ');
     mapCard.querySelector('.popup__description').textContent = user.offer.description;
-    mapCardPhoto.src = user.offer.photos[0];
 
-    for (var i = 1; i < user.offer.photos.length; i++) {
+    for (var i = 0; i < user.offer.photos.length; i++) {
       var photoItem = mapCardPhoto.cloneNode(true);
       photoItem.src = user.offer.photos[i];
       photosFragment.appendChild(photoItem);
     }
+    mapCardPhotos.innerHTML = '';
     mapCardPhotos.appendChild(photosFragment);
   }
 
@@ -222,4 +262,44 @@
       mapCard.classList.add('hidden');
     });
   }
+
+  //  Валидация
+  function changeTime(checkedTime, timeToChange) {
+    timeToChange.value = checkedTime.value;
+  }
+
+  function choosePrice(type) {
+    var priceToAdd = priceMap[type];
+    roomPrice.min = priceToAdd;
+    roomPrice.placeholder = priceToAdd;
+  }
+
+  function matchRooms(roomIndex) {
+    var options = roomCapacity.querySelectorAll('option');
+    var roomAvailability = roomMap[roomIndex].optionStates;
+    var roomToSelect = roomMap[roomIndex].selectItem;
+
+    for (var i = 0; i < options.length; i++) {
+      options[i].disabled = roomAvailability[i];
+    }
+    options[roomToSelect].selected = true;
+  }
+
+  matchRooms(roomNumber.value);
+
+  roomTimeIn.addEventListener('change', function () {
+    changeTime(roomTimeIn, roomTimeOut);
+  });
+
+  roomTimeOut.addEventListener('change', function () {
+    changeTime(roomTimeOut, roomTimeIn);
+  });
+
+  roomType.addEventListener('change', function (evt) {
+    choosePrice(evt.target.value);
+  });
+
+  roomNumber.addEventListener('change', function (evt) {
+    matchRooms(evt.target.value);
+  });
 })();
