@@ -20,6 +20,7 @@
   var MAX_LOCATION_X = 900;
   var MIN_LOCATION_Y = 130;
   var MAX_LOCATION_Y = 630;
+  var PINS_BLOCK_WIDTH = 1200;
   var MIN_PRICE = 1000;
   var MAX_PRICE = 1000000;
   var MIN_ROOMS = 1;
@@ -141,6 +142,13 @@
       }
       if (newPositionY <= MIN_LOCATION_Y) {
         newPositionY = MIN_LOCATION_Y;
+      }
+
+      if (newPositionX >= PINS_BLOCK_WIDTH - MAIN_PIN_WIDTH) {
+        newPositionX = PINS_BLOCK_WIDTH - MAIN_PIN_WIDTH;
+      }
+      if (newPositionX <= 0) {
+        newPositionX = 0;
       }
 
       mapPinMain.style.top = newPositionY + 'px';
