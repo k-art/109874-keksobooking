@@ -133,8 +133,18 @@
         y: moveEvt.clientY
       };
 
-      mapPinMain.style.top = (mapPinMain.offsetTop - shift.y) + 'px';
-      mapPinMain.style.left = (mapPinMain.offsetLeft - shift.x) + 'px';
+      var newPositionY = mapPinMain.offsetTop - shift.y;
+      var newPositionX = mapPinMain.offsetLeft - shift.x;
+
+      if (newPositionY >= MAX_LOCATION_Y) {
+        newPositionY = MAX_LOCATION_Y;
+      }
+      if (newPositionY <= MIN_LOCATION_Y) {
+        newPositionY = MIN_LOCATION_Y;
+      }
+
+      mapPinMain.style.top = newPositionY + 'px';
+      mapPinMain.style.left = newPositionX + 'px';
     }
 
     function onMouseUp(upEvt) {
