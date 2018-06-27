@@ -20,6 +20,7 @@
   var MAX_LOCATION_X = 900;
   var MIN_LOCATION_Y = 130;
   var MAX_LOCATION_Y = 630;
+  var PINS_BLOCK_WIDTH = 1200;
   var MIN_PRICE = 1000;
   var MAX_PRICE = 1000000;
   var MIN_ROOMS = 1;
@@ -112,10 +113,58 @@
     setMainPinAddress(evt);
   }
 
-  // Активация/деактивация страницы
-  mapPinMain.addEventListener('mouseup', function (evt) {
-    activatePage(evt);
-    renderMapPins(usersData);
+  // Перемещение пина по карте
+  mapPinMain.addEventListener('mousedown', function (evt) {
+
+    var startCoords = {
+      x: evt.clientX,
+      y: evt.clientY
+    };
+
+    function onMouseMove(moveEvt) {
+      moveEvt.preventDefault();
+
+      var shift = {
+        x: startCoords.x - moveEvt.clientX,
+        y: startCoords.y - moveEvt.clientY
+      };
+
+      startCoords = {
+        x: moveEvt.clientX,
+        y: moveEvt.clientY
+      };
+
+      var newPositionY = mapPinMain.offsetTop - shift.y;
+      var newPositionX = mapPinMain.offsetLeft - shift.x;
+
+      if (newPositionY >= MAX_LOCATION_Y) {
+        newPositionY = MAX_LOCATION_Y;
+      }
+      if (newPositionY <= MIN_LOCATION_Y) {
+        newPositionY = MIN_LOCATION_Y;
+      }
+
+      if (newPositionX >= PINS_BLOCK_WIDTH - MAIN_PIN_WIDTH) {
+        newPositionX = PINS_BLOCK_WIDTH - MAIN_PIN_WIDTH;
+      }
+      if (newPositionX <= 0) {
+        newPositionX = 0;
+      }
+
+      mapPinMain.style.top = newPositionY + 'px';
+      mapPinMain.style.left = newPositionX + 'px';
+    }
+
+    function onMouseUp(upEvt) {
+      upEvt.preventDefault();
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      activatePage(upEvt);
+      renderMapPins(usersData);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   });
 
   formButtonReset.addEventListener('click', function (evt) {
