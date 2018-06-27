@@ -3,7 +3,6 @@
 (function () {
   var adForm = document.querySelector('.ad-form');
   var formButtonReset = adForm.querySelector('.ad-form__reset');
-  var mapPinsBlock = document.querySelector('.map__pins');
   var roomTimeIn = adForm.querySelector('#timein');
   var roomTimeOut = adForm.querySelector('#timeout');
   var roomType = adForm.querySelector('#type');
@@ -78,13 +77,5 @@
 
   formButtonReset.addEventListener('click', function (evt) {
     window.deactivatePage(evt);
-
-    var mapPinsList = mapPinsBlock.querySelectorAll('.map__pin');
-    for (var i = mapPinsList.length - 1; i >= 0; i--) {
-      var child = mapPinsList[i];
-      if (!child.classList.contains('map__pin--main')) {
-        child.parentElement.removeChild(child);
-      }
-    }
   });
 })();

@@ -29,6 +29,7 @@
       formFieldsets[i].disabled = true;
     }
     setMainPinAddress(evt);
+    removePins();
     removeCard();
   };
 
@@ -52,6 +53,63 @@
       y = parseInt(mapPinMain.style.top, 10) - (MAIN_PIN_HEIGHT + MAIN_PIN_SHARP_END);
     }
     formInputAddress.value = x + ', ' + y;
+  }
+
+  function removePins() {
+    var mapPinsList = mapPinsBlock.querySelectorAll('.map__pin');
+    for (var i = mapPinsList.length - 1; i >= 0; i--) {
+      var child = mapPinsList[i];
+      if (!child.classList.contains('map__pin--main')) {
+        child.parentElement.removeChild(child);
+      }
+    }
+  }
+
+  function removeCard() {
+    var card = map.querySelector('.map__card');
+    if (card) {
+      card.parentNode.removeChild(card);
+    }
+  }
+
+  function addCardListeners() {
+    var mapCard = map.querySelector('.map__card');
+    var popupClose = mapCard.querySelector('.popup__close');
+
+    function closePopup(newCard) {
+      newCard.classList.add('hidden');
+    }
+
+    popupClose.addEventListener('click', function () {
+      closePopup(mapCard);
+    });
+    document.addEventListener('keydown', function (evt) {
+      if (window.utils.isEscPressed(evt)) {
+        closePopup(mapCard);
+      }
+    });
+  }
+
+  function renderMapPins(usersDataArray) {
+    var pinsFragment = document.createDocumentFragment();
+
+    for (var i = 0; i < usersDataArray.length; i++) {
+      var offerPin = window.createPin(usersDataArray[i]);
+      offerPin.offerData = usersDataArray[i];
+      offerPin.addEventListener('click', onOfferPinClick);
+      pinsFragment.appendChild(offerPin);
+    }
+    mapPinsBlock.appendChild(pinsFragment);
+  }
+
+  function onOfferPinClick(evt) {
+    removeCard();
+
+    var newCard = window.createCard(evt.currentTarget.offerData);
+    var cardFragment = document.createDocumentFragment().appendChild(newCard);
+    map.insertBefore(cardFragment, mapFiltersContainer);
+
+    addCardListeners();
   }
 
   // Перемещение пина по карте
@@ -109,51 +167,4 @@
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });
-
-  function renderMapPins(usersDataArray) {
-    var pinsFragment = document.createDocumentFragment();
-
-    for (var i = 0; i < usersDataArray.length; i++) {
-      var offerPin = window.createPin(usersDataArray[i]);
-      offerPin.offerData = usersDataArray[i];
-      offerPin.addEventListener('click', onOfferPinClick);
-      pinsFragment.appendChild(offerPin);
-    }
-    mapPinsBlock.appendChild(pinsFragment);
-  }
-
-  function addCardListeners() {
-    var mapCard = map.querySelector('.map__card');
-    var popupClose = mapCard.querySelector('.popup__close');
-
-    function closePopup(newCard) {
-      newCard.classList.add('hidden');
-    }
-
-    popupClose.addEventListener('click', function () {
-      closePopup(mapCard);
-    });
-    document.addEventListener('keydown', function (evt) {
-      if (window.utils.isEscPressed(evt)) {
-        closePopup(mapCard);
-      }
-    });
-  }
-
-  function removeCard() {
-    var card = map.querySelector('.map__card');
-    if (card) {
-      card.parentNode.removeChild(card);
-    }
-  }
-
-  function onOfferPinClick(evt) {
-    removeCard();
-
-    var newCard = window.createCard(evt.currentTarget.offerData);
-    var cardFragment = document.createDocumentFragment().appendChild(newCard);
-    map.insertBefore(cardFragment, mapFiltersContainer);
-
-    addCardListeners();
-  }
 })();
