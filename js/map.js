@@ -20,22 +20,29 @@
   var mapFiltersContainer = document.querySelector('.map__filters-container');
 
   var mapPinMainStart = {
-    x: parseInt(mapPinMain.style.left, 10) - MAIN_PIN_WIDTH / 2,
-    y: parseInt(mapPinMain.style.top, 10) - MAIN_PIN_HEIGHT / 2
+    x: parseInt(mapPinMain.style.left, 10),
+    y: parseInt(mapPinMain.style.top, 10)
   };
 
-  var adFormInputList = adForm.querySelectorAll('input');
-  var valuesDefault = saveDefaultValues();
+  var adFormInputList = adForm.querySelectorAll('input, select, textarea');
+  var valuesDefault = saveDefaultFormValues();
 
-  function saveDefaultValues() {
+  function saveDefaultFormValues() {
+    var valuesArray = {};
     for (var i = 0; i < adFormInputList.length; i++) {
-      var valuesArray = [];
-      valuesArray[i] = adFormInputList[i];
+      valuesArray[adFormInputList[i].id] = adFormInputList[i].value;
     }
     return valuesArray;
   }
 
-  function resetInputValues() {
+  function resetDefaultFormValues() {
+    for (var i = 0; i < adFormInputList.length; i++) {
+      for (var key in valuesDefault) {
+        if (adFormInputList[i].id === key) {
+          adFormInputList[i].value = valuesDefault[adFormInputList[i].id];
+        }
+      }
+    }
   }
 
   window.deactivatePage = function () {
@@ -58,11 +65,11 @@
   }
 
   function setMainPinAddress(evt) {
-    var x = parseInt(mapPinMain.style.left, 10) - MAIN_PIN_WIDTH / 2;
+    var x = parseInt(mapPinMain.style.left, 10) + Math.floor(MAIN_PIN_WIDTH / 2);
+    var y = parseInt(mapPinMain.style.top, 10) + Math.floor(MAIN_PIN_HEIGHT / 2);
 
-    var y = parseInt(mapPinMain.style.top, 10) - MAIN_PIN_HEIGHT / 2;
-    if (evt && evt.type === 'mousemove') {
-      y = parseInt(mapPinMain.style.top, 10) - (MAIN_PIN_HEIGHT + MAIN_PIN_SHARP_END);
+    if (evt && evt.type === 'mousedown') {
+      y = parseInt(mapPinMain.style.top, 10) + (MAIN_PIN_HEIGHT + MAIN_PIN_SHARP_END);
     }
     formInputAddress.value = x + ', ' + y;
   }
@@ -72,6 +79,7 @@
     removeCard();
     mapPinMain.style.left = mapPinMainStart.x + 'px';
     mapPinMain.style.top = mapPinMainStart.y + 'px';
+    resetDefaultFormValues();
     setMainPinAddress();
   }
 
@@ -172,10 +180,12 @@
 
       mapPinMain.style.top = newPositionY + 'px';
       mapPinMain.style.left = newPositionX + 'px';
-      setMainPinAddress();
+
+      setMainPinAddress(evt);
     }
 
     function onMouseUp(upEvt) {
+      setMainPinAddress(evt);
       upEvt.preventDefault();
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
