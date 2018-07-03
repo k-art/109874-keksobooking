@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  var success = document.querySelector('.success');
   var adForm = document.querySelector('.ad-form');
   var formButtonReset = adForm.querySelector('.ad-form__reset');
   var roomTimeIn = adForm.querySelector('#timein');
@@ -35,6 +36,29 @@
     house: 5000,
     palace: 10000
   };
+
+  function closeSuccessMessage() {
+    success.classList.add('hidden');
+  }
+
+  function onSuccessMessageClick() {
+    closeSuccessMessage();
+    document.removeEventListener('click', onSuccessMessageClick);
+  }
+
+  function onEscPress(evt) {
+    if (window.utils.isEscPressed(evt)) {
+      closeSuccessMessage();
+      document.removeEventListener('keydown', onEscPress);
+    }
+  }
+
+  function onSuccessUpload() {
+    window.deactivatePage();
+    success.classList.remove('hidden');
+    document.addEventListener('click', onSuccessMessageClick);
+    document.addEventListener('keydown', onEscPress);
+  }
 
   function changeTime(checkedTime, timeToChange) {
     timeToChange.value = checkedTime.value;
@@ -77,5 +101,10 @@
 
   formButtonReset.addEventListener('click', function (evt) {
     window.deactivatePage(evt);
+  });
+
+  adForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.save(new FormData(adForm), onSuccessUpload, window.error);
   });
 })();
