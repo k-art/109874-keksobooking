@@ -52,10 +52,10 @@
     var rank = 0;
 
     if (pin.offer.type === filterToAdd.type) {
-      rank += 2;
+      rank += 4;
     }
     if (evaluatePrice(pin.offer.price) === filterToAdd.price) {
-      rank += 2;
+      rank += 3;
     }
     if (pin.offer.rooms === parseInt(filterToAdd.rooms, 10)) {
       rank += 2;
@@ -102,7 +102,7 @@
       }
 
       filterToAdd[filterMap[evt.target.name]] = evt.target.value;
-      window.filterPins();
+      window.debounce(window.filterPins());
       removeFilterListeners(filtersSelectList);
     }
 
