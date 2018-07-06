@@ -18,21 +18,27 @@
   };
 
   var adFormInputList = adForm.querySelectorAll('input, select, textarea');
-  var valuesDefault = saveDefaultFormValues();
+  var adFormValuesDefault = saveDefaultFormValues(adFormInputList);
 
-  function saveDefaultFormValues() {
+  var filtersForm = document.querySelector('.map__filters');
+  var filtersSelectList = filtersForm.querySelectorAll('.map__filter, .map__checkbox');
+  var filterFormValuesDefault = saveDefaultFormValues(filtersSelectList);
+
+  function saveDefaultFormValues(inputList) {
     var valuesArray = {};
-    for (var i = 0; i < adFormInputList.length; i++) {
-      valuesArray[adFormInputList[i].id] = adFormInputList[i].value;
+    for (var i = 0; i < inputList.length; i++) {
+      valuesArray[inputList[i].id] = inputList[i].value;
     }
     return valuesArray;
   }
 
-  function resetDefaultFormValues() {
-    for (var i = 0; i < adFormInputList.length; i++) {
-      for (var key in valuesDefault) {
-        if (adFormInputList[i].id === key) {
-          adFormInputList[i].value = valuesDefault[adFormInputList[i].id];
+  function resetDefaultFormValues(defaultValues, inputList) {
+    for (var i = 0; i < inputList.length; i++) {
+      for (var key in defaultValues) {
+        if (inputList[i].id === key) {
+          inputList[i].value = defaultValues[inputList[i].id];
+        } else if (inputList[i].type === 'checkbox') {
+          inputList[i].checked = false;
         }
       }
     }
@@ -76,7 +82,8 @@
     resetMainPin();
     window.cancel.pins();
     window.cancel.card();
-    resetDefaultFormValues();
+    resetDefaultFormValues(adFormValuesDefault, adFormInputList);
+    resetDefaultFormValues(filterFormValuesDefault, filtersSelectList);
     setMainPinAddress();
   }
 
