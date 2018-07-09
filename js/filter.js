@@ -39,87 +39,72 @@
     return answer;
   }
 
-  function compareFeatures(pinArray, filterArray) {
-    var rank = filterArray.length;
-    if (pinArray.length < filterArray.length) {
-      rank -= pinArray.length;
+  function applyFilter() {
+    var pinsFiltered = pins.slice();
+    var filterValue;
+
+    for (var key in filterToAdd) {
+      if (key === 'features') {
+
+        pinsFiltered = pinsFiltered.filter(function (pin) {
+          pin.offer[key].forEach(function (element, index) {
+            filterValue = element === pin.offer[key][index];
+          });
+          return filterValue;
+        });
+      }
+
+      if (filterToAdd[key] !== 'any' && key !== 'features') {
+        pinsFiltered = pinsFiltered.filter(function (pin) {
+          if (key !== 'features') {
+            filterValue = pin.offer[key] === filterToAdd[key];
+          }
+
+          if (key === 'price') {
+            filterValue = evaluatePrice(pin.offer[key]) === filterToAdd[key];
+          }
+
+          if (key === 'rooms' || key === 'guests') {
+            filterValue = pin.offer[key] === parseInt(filterToAdd[key], 10);
+          }
+
+          return filterValue;
+        });
+      }
     }
-    return rank;
+
+
+    // console.log(pinsFiltered);
+    window.pins.render(pinsFiltered);
   }
 
+  function onFilterChange(evt) {
+    window.card.close();
+    if (evt.target.type === 'checkbox') {
+      if (evt.target.checked) {
+        filterToAdd.features.push(filterMap.features[evt.target.id]);
+      } else {
+        var index = filterToAdd.features.indexOf(filterMap.features[evt.target.id]);
+        filterToAdd.features.splice(index, 1);
+      }
+    }
+    filterToAdd[filterMap[evt.target.name]] = evt.target.value;
 
-  function getRank(pin) {
-    var rank = 0;
-
-    if (pin.offer.type === filterToAdd.type) {
-      rank += 4;
-    }
-    if (evaluatePrice(pin.offer.price) === filterToAdd.price) {
-      rank += 3;
-    }
-    if (pin.offer.rooms === parseInt(filterToAdd.rooms, 10)) {
-      rank += 2;
-    }
-    if (pin.offer.guests === parseInt(filterToAdd.guests, 10)) {
-      rank += 2;
-    }
-    rank += compareFeatures(pin.offer.features, filterToAdd.features);
-
-    return rank;
+    window.utils.debounce(applyFilter());
   }
 
-  function namesComparator(left, right) {
-    if (left > right) {
-      return 1;
-    } else if (left < right) {
-      return -1;
-    } else {
-      return 0;
-    }
-  }
-
-  window.filterPins = function (data) {
-    if (data) {
+  window.filter = {
+    start: function (data) {
       pins = data;
-    }
-
-    window.render(pins.sort(function (left, right) {
-      var rankDiff = getRank(right) - getRank(left);
-      if (rankDiff === 0) {
-        rankDiff = namesComparator(left.name, right.name);
-      }
-      return rankDiff;
-    }));
-
-    function onFilterChange(evt) {
-      if (evt.target.type === 'checkbox') {
-        if (evt.target.checked) {
-          filterToAdd.features.push(filterMap.features[evt.target.id]);
-        } else {
-          var index = filterToAdd.features.indexOf(filterMap.features[evt.target.id]);
-          filterToAdd.features.splice(index, 1);
-        }
-      }
-
-      filterToAdd[filterMap[evt.target.name]] = evt.target.value;
-      window.debounce(window.filterPins());
-      removeFilterListeners(filtersSelectList);
-    }
-
-    function addFilterListeners(filters) {
-      filters.forEach(function (filter) {
+      filtersSelectList.forEach(function (filter) {
         filter.addEventListener('change', onFilterChange);
       });
-    }
+    },
 
-    function removeFilterListeners(filters) {
-      filters.forEach(function (filter) {
+    stop: function () {
+      filtersSelectList.forEach(function (filter) {
         filter.removeEventListener('change', onFilterChange);
       });
-    }
-
-    if (window.isActivePage) {
-      addFilterListeners(filtersSelectList);
     }
   };
 })();

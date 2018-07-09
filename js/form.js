@@ -39,25 +39,29 @@
 
   function closeSuccessMessage() {
     success.classList.add('hidden');
+    success.removeEventListener('click', onSuccessMessageClick);
+    document.removeEventListener('keydown', onEscPress);
   }
 
   function onSuccessMessageClick() {
     closeSuccessMessage();
-    document.removeEventListener('click', onSuccessMessageClick);
   }
 
   function onEscPress(evt) {
     if (window.utils.isEscPressed(evt)) {
       closeSuccessMessage();
-      document.removeEventListener('keydown', onEscPress);
     }
   }
 
   function onSuccessUpload() {
     window.deactivatePage();
     success.classList.remove('hidden');
-    document.addEventListener('click', onSuccessMessageClick);
+    success.addEventListener('click', onSuccessMessageClick);
     document.addEventListener('keydown', onEscPress);
+  }
+
+  function onErrorUpload(errorMessage) {
+    window.error(errorMessage);
   }
 
   function changeTime(checkedTime, timeToChange) {
@@ -75,9 +79,9 @@
     var roomAvailability = roomMap[roomIndex].optionStates;
     var roomToSelect = roomMap[roomIndex].selectItem;
 
-    for (var i = 0; i < options.length; i++) {
-      options[i].disabled = roomAvailability[i];
-    }
+    options.forEach(function (option, i) {
+      option.disabled = roomAvailability[i];
+    });
     options[roomToSelect].selected = true;
   }
 
@@ -105,6 +109,6 @@
 
   adForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
-    window.backend.save(new FormData(adForm), onSuccessUpload, window.error);
+    window.backend.save(new FormData(adForm), onSuccessUpload, onErrorUpload);
   });
 })();
