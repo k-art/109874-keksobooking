@@ -69,9 +69,9 @@
   }
 
   function choosePrice(type) {
-    var priceToAdd = priceMap[type];
-    roomPrice.min = priceToAdd;
-    roomPrice.placeholder = priceToAdd;
+    var price = priceMap[type];
+    roomPrice.min = price;
+    roomPrice.placeholder = price;
   }
 
   function matchRooms(roomIndex) {

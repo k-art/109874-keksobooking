@@ -2,7 +2,7 @@
 
 window.utils = (function () {
   var ESC_KEY_CODE = 27;
-  var DEBOUNCE_INTERVAL = 5000; // ms
+  var DEBOUNCE_INTERVAL = 500; // ms
 
   return {
 

@@ -8,25 +8,16 @@
     'housing-type': 'type',
     'housing-price': 'price',
     'housing-rooms': 'rooms',
-    'housing-guests': 'guests',
-    'features': {
-      'filter-wifi': 'wifi',
-      'filter-dishwasher': 'dishwasher',
-      'filter-parking': 'parking',
-      'filter-washer': 'washer',
-      'filter-elevator': 'elevator',
-      'filter-conditioner': 'conditioner'
-    }
+    'housing-guests': 'guests'
   };
-
-  var filterToAdd = {
+  var filterState = {
     type: 'any',
     price: 'any',
     rooms: 'any',
     guests: 'any',
     features: []
   };
-  var pins = [];
+  var adsData = [];
 
   function evaluatePrice(value) {
     var answer = 'middle';
@@ -40,32 +31,21 @@
   }
 
   function applyFilter() {
-    var pinsFiltered = pins.slice();
+    var adsFiltered = adsData.slice();
     var filterValue;
 
-    for (var key in filterToAdd) {
-      if (key === 'features') {
+    for (var key in filterState) {
+      if (filterState[key] !== 'any' && key !== 'features') {
+        adsFiltered = adsFiltered.filter(function (ad) {
 
-        pinsFiltered = pinsFiltered.filter(function (pin) {
-          pin.offer[key].forEach(function (element, index) {
-            filterValue = element === pin.offer[key][index];
-          });
-          return filterValue;
-        });
-      }
-
-      if (filterToAdd[key] !== 'any' && key !== 'features') {
-        pinsFiltered = pinsFiltered.filter(function (pin) {
-          if (key !== 'features') {
-            filterValue = pin.offer[key] === filterToAdd[key];
-          }
+          filterValue = ad.offer[key] === filterState[key];
 
           if (key === 'price') {
-            filterValue = evaluatePrice(pin.offer[key]) === filterToAdd[key];
+            filterValue = evaluatePrice(ad.offer[key]) === filterState[key];
           }
 
           if (key === 'rooms' || key === 'guests') {
-            filterValue = pin.offer[key] === parseInt(filterToAdd[key], 10);
+            filterValue = ad.offer[key] === parseInt(filterState[key], 10);
           }
 
           return filterValue;
@@ -73,29 +53,41 @@
       }
     }
 
+    function featuresFilter(stateFilter, ad) {
+      var featuresFiltered = stateFilter.features.filter(function (feature) {
+        return ad.offer.features.indexOf(feature) !== -1;
+      });
+      return featuresFiltered.length === stateFilter.features.length;
+    }
 
-    // console.log(pinsFiltered);
-    window.pins.render(pinsFiltered);
+    adsFiltered = adsFiltered.filter(function (ad) {
+      return featuresFilter(filterState, ad);
+    });
+
+    return window.pins.render(adsFiltered);
+  }
+
+  function checkFeatures() {
+    var featuresChecked = filtersForm.querySelectorAll('input:checked');
+    filterState.features = [];
+
+    featuresChecked.forEach(function (node) {
+      filterState.features.push(node.value);
+    });
   }
 
   function onFilterChange(evt) {
-    window.card.close();
-    if (evt.target.type === 'checkbox') {
-      if (evt.target.checked) {
-        filterToAdd.features.push(filterMap.features[evt.target.id]);
-      } else {
-        var index = filterToAdd.features.indexOf(filterMap.features[evt.target.id]);
-        filterToAdd.features.splice(index, 1);
-      }
+    if (evt.target.type !== 'checkbox') {
+      filterState[filterMap[evt.target.name]] = evt.target.value;
     }
-    filterToAdd[filterMap[evt.target.name]] = evt.target.value;
-
+    checkFeatures();
+    window.card.close();
     window.utils.debounce(applyFilter());
   }
 
   window.filter = {
     start: function (data) {
-      pins = data;
+      adsData = data;
       filtersSelectList.forEach(function (filter) {
         filter.addEventListener('change', onFilterChange);
       });

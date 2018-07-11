@@ -53,23 +53,23 @@
   }
 
   window.card = {
-    create: function (user) {
+    create: function (ad) {
       var newCard = mapCardSimilar.cloneNode(true);
       var photosBlock = newCard.querySelector('.popup__photos');
       var photo = photosBlock.querySelector('img');
       var featuresBlock = newCard.querySelector('.popup__features');
       var featuresList = newCard.querySelectorAll('.popup__feature');
 
-      newCard.querySelector('img').src = user.author.avatar;
-      newCard.querySelector('.popup__title').textContent = user.offer.title;
-      newCard.querySelector('.popup__text--address').textContent = user.offer.address;
-      newCard.querySelector('.popup__text--price').textContent = user.offer.price + ' ₽/ночь';
-      newCard.querySelector('.popup__type').textContent = getHomeType(user.offer.type);
-      newCard.querySelector('.popup__text--capacity').textContent = user.offer.rooms + ' комнаты для ' + user.offer.guests + ' гостей';
-      newCard.querySelector('.popup__text--time').textContent = 'Заезд после ' + user.offer.checkin + ', выезд до ' + user.offer.checkout;
-      newCard.querySelector('.popup__description').textContent = user.offer.description;
-      setFeatures(featuresBlock, featuresList, user.offer.features);
-      setPhotos(photosBlock, photo, user.offer.photos);
+      newCard.querySelector('img').src = ad.author.avatar;
+      newCard.querySelector('.popup__title').textContent = ad.offer.title;
+      newCard.querySelector('.popup__text--address').textContent = ad.offer.address;
+      newCard.querySelector('.popup__text--price').textContent = ad.offer.price + ' ₽/ночь';
+      newCard.querySelector('.popup__type').textContent = getHomeType(ad.offer.type);
+      newCard.querySelector('.popup__text--capacity').textContent = ad.offer.rooms + ' комнаты для ' + ad.offer.guests + ' гостей';
+      newCard.querySelector('.popup__text--time').textContent = 'Заезд после ' + ad.offer.checkin + ', выезд до ' + ad.offer.checkout;
+      newCard.querySelector('.popup__description').textContent = ad.offer.description;
+      setFeatures(featuresBlock, featuresList, ad.offer.features);
+      setPhotos(photosBlock, photo, ad.offer.photos);
 
       window.card.open(newCard);
     },
