@@ -2,13 +2,16 @@
 
 
 window.backend = (function () {
+  var STATUS_OK = 200;
+  var TIMEOUT = 10000; // 10s
+
   function request(url, onLoad, onError, data) {
     var xhr = new XMLHttpRequest();
 
     xhr.responseType = 'json';
 
     xhr.addEventListener('load', function () {
-      if (xhr.status === 200) {
+      if (xhr.status === STATUS_OK) {
         onLoad(xhr.response);
 
       } else {
@@ -24,7 +27,7 @@ window.backend = (function () {
       onError('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
     });
 
-    xhr.timeout = 10000; // 10s
+    xhr.timeout = TIMEOUT;
 
     if (data) {
       xhr.open('POST', url);
