@@ -8,25 +8,16 @@
     'housing-type': 'type',
     'housing-price': 'price',
     'housing-rooms': 'rooms',
-    'housing-guests': 'guests',
-    'features': {
-      'filter-wifi': 'wifi',
-      'filter-dishwasher': 'dishwasher',
-      'filter-parking': 'parking',
-      'filter-washer': 'washer',
-      'filter-elevator': 'elevator',
-      'filter-conditioner': 'conditioner'
-    }
+    'housing-guests': 'guests'
   };
-
-  var filterToAdd = {
+  var filterState = {
     type: 'any',
     price: 'any',
     rooms: 'any',
     guests: 'any',
     features: []
   };
-  var pins = [];
+  var adsData = [];
 
   function evaluatePrice(value) {
     var answer = 'middle';
@@ -39,87 +30,73 @@
     return answer;
   }
 
-  function compareFeatures(pinArray, filterArray) {
-    var rank = filterArray.length;
-    if (pinArray.length < filterArray.length) {
-      rank -= pinArray.length;
-    }
-    return rank;
-  }
+  function applyFilter() {
+    var adsFiltered = adsData.slice();
+    var filterValue;
 
+    for (var key in filterState) {
+      if (filterState[key] !== 'any' && key !== 'features') {
+        adsFiltered = adsFiltered.filter(function (ad) {
 
-  function getRank(pin) {
-    var rank = 0;
+          filterValue = ad.offer[key] === filterState[key];
 
-    if (pin.offer.type === filterToAdd.type) {
-      rank += 4;
-    }
-    if (evaluatePrice(pin.offer.price) === filterToAdd.price) {
-      rank += 3;
-    }
-    if (pin.offer.rooms === parseInt(filterToAdd.rooms, 10)) {
-      rank += 2;
-    }
-    if (pin.offer.guests === parseInt(filterToAdd.guests, 10)) {
-      rank += 2;
-    }
-    rank += compareFeatures(pin.offer.features, filterToAdd.features);
+          if (key === 'price') {
+            filterValue = evaluatePrice(ad.offer[key]) === filterState[key];
+          }
 
-    return rank;
-  }
+          if (key === 'rooms' || key === 'guests') {
+            filterValue = ad.offer[key] === parseInt(filterState[key], 10);
+          }
 
-  function namesComparator(left, right) {
-    if (left > right) {
-      return 1;
-    } else if (left < right) {
-      return -1;
-    } else {
-      return 0;
-    }
-  }
-
-  window.filterPins = function (data) {
-    if (data) {
-      pins = data;
-    }
-
-    window.render(pins.sort(function (left, right) {
-      var rankDiff = getRank(right) - getRank(left);
-      if (rankDiff === 0) {
-        rankDiff = namesComparator(left.name, right.name);
+          return filterValue;
+        });
       }
-      return rankDiff;
-    }));
-
-    function onFilterChange(evt) {
-      if (evt.target.type === 'checkbox') {
-        if (evt.target.checked) {
-          filterToAdd.features.push(filterMap.features[evt.target.id]);
-        } else {
-          var index = filterToAdd.features.indexOf(filterMap.features[evt.target.id]);
-          filterToAdd.features.splice(index, 1);
-        }
-      }
-
-      filterToAdd[filterMap[evt.target.name]] = evt.target.value;
-      window.debounce(window.filterPins());
-      removeFilterListeners(filtersSelectList);
     }
 
-    function addFilterListeners(filters) {
-      filters.forEach(function (filter) {
+    function featuresFilter(stateFilter, ad) {
+      var featuresFiltered = stateFilter.features.filter(function (feature) {
+        return ad.offer.features.indexOf(feature) !== -1;
+      });
+      return featuresFiltered.length === stateFilter.features.length;
+    }
+
+    adsFiltered = adsFiltered.filter(function (ad) {
+      return featuresFilter(filterState, ad);
+    });
+
+    return window.pins.render(adsFiltered);
+  }
+
+  function checkFeatures() {
+    var featuresChecked = filtersForm.querySelectorAll('input:checked');
+    filterState.features = [];
+
+    featuresChecked.forEach(function (node) {
+      filterState.features.push(node.value);
+    });
+  }
+
+  function onFilterChange(evt) {
+    if (evt.target.type !== 'checkbox') {
+      filterState[filterMap[evt.target.name]] = evt.target.value;
+    }
+    checkFeatures();
+    window.card.close();
+    window.utils.debounce(applyFilter());
+  }
+
+  window.filter = {
+    start: function (data) {
+      adsData = data;
+      filtersSelectList.forEach(function (filter) {
         filter.addEventListener('change', onFilterChange);
       });
-    }
+    },
 
-    function removeFilterListeners(filters) {
-      filters.forEach(function (filter) {
+    stop: function () {
+      filtersSelectList.forEach(function (filter) {
         filter.removeEventListener('change', onFilterChange);
       });
-    }
-
-    if (window.isActivePage) {
-      addFilterListeners(filtersSelectList);
     }
   };
 })();
