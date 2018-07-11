@@ -23,21 +23,36 @@
   var filterFormValuesDefault = saveDefaultFormValues(filtersSelectList);
 
   function saveDefaultFormValues(inputList) {
-    var valuesArray = [];
+    var defaultValues = {};
+
     inputList.forEach(function (input) {
-      valuesArray[input.id] = input.value;
+
+      defaultValues[input.id] = input.value;
+
+      if (input.id === 'price') {
+        defaultValues.price = {};
+        defaultValues.price.value = input.value;
+        defaultValues.price.placeholder = input.placeholder;
+        defaultValues.price.min = input.min;
+      }
     });
-    return valuesArray;
+
+    return defaultValues;
   }
 
   function resetDefaultFormValues(defaultValues, inputList) {
     inputList.forEach(function (input) {
-      for (var key in defaultValues) {
-        if (input.id === key) {
-          input.value = defaultValues[input.id];
-        } else if (input.type === 'checkbox') {
-          input.checked = false;
-        }
+
+      input.value = defaultValues[input.id];
+
+      if (input.type === 'checkbox') {
+        input.checked = false;
+      }
+
+      if (input.id === 'price') {
+        input.value = defaultValues[input.id].value;
+        input.placeholder = defaultValues[input.id].placeholder;
+        input.min = defaultValues[input.id].min;
       }
     });
   }
